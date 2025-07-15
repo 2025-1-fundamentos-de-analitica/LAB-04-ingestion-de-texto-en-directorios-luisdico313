@@ -4,7 +4,10 @@
 """
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
-
+import os
+import zipfile
+import pandas as pd
+import shutil
 
 def pregunta_01():
     """
@@ -71,3 +74,43 @@ def pregunta_01():
 
 
     """
+
+    input_zip_path = "files/input.zip"
+    extract_dir = "input"
+    output_dir = "files/output"
+
+    # Se descomprime el archivo
+    with zipfile.ZipFile(input_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(".")
+
+
+    #Crear carpeta output
+    os.makedirs(output_dir, exist_ok=True)
+
+
+
+
+
+
+    def create_dataset(tipo):
+        data = []
+        split_path = os.path.join(extract_dir, tipo)
+        for sentiment in ['positive', 'negative', 'neutral']:
+            sentiment_path = os.path.join(split_path, sentiment)
+            for filename in sorted(os.listdir(sentiment_path)):
+                file_path = os.path.join(sentiment_path, filename)
+                with open(file_path, encoding='utf-8') as file:
+                    phrase = file.read().strip()
+                    data.append({'phrase': phrase, 'target': sentiment})
+        return pd.DataFrame(data)
+
+    # 4. Crear y guardar los datasets
+    train_df = create_dataset('train')
+    test_df = create_dataset('test')
+
+    train_df.to_csv(os.path.join(output_dir, 'train_dataset.csv'), index=False)
+    test_df.to_csv(os.path.join(output_dir, 'test_dataset.csv'), index=False)
+
+
+
+
